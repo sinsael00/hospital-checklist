@@ -14,6 +14,13 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
 RECORDS_FILE = os.path.join(DATA_DIR, "records.json")
 
+def slot_key(slot):
+    """슬롯 표기(AM/PM/오전 09:00/깨진 인코딩 포함)를 AM/PM으로 정규화"""
+    s = slot or ""
+    if "09:00" in s or "AM" in s or "오전" in s:
+        return "AM"
+    return "PM"
+
 def check_youtube_autocomplete(query, target):
     url = f"https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&hl=ko&gl=KR&q={urllib.parse.quote(query)}"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -127,8 +134,8 @@ def get_monthly_matrix(year, month, keywords, records, carry_over=True):
                     if best_rank is None or r < best_rank:
                         best_rank = r
 
+            prev = consecutive_counts[kid]
             if is_exp:
-                prev = consecutive_counts[kid]
                 if prev >= 30.0:
                     prev = 0.0
                 consecutive_counts[kid] = round(prev + credit, 1)
@@ -463,6 +470,8 @@ def main():
     hour = now_kst.hour
 
     slot = "오전 09:00" if hour < 14 else "오후 18:00"
+    # 레코드 id는 기존 최대값 기준으로 부여 (로컬/클라우드 병합 시 충돌 방지)
+    next_id = max([r.get("id", 0) for r in records] + [0]) + 1
 
     # 2. Check keywords
     all_kws = settings.get("keywords", [])
@@ -473,7 +482,7 @@ def main():
     for k in active_kws:
         res = check_youtube_autocomplete(k["query"], k["target"])
         rec = {
-            "id": len(records) + 1,
+            "id": next_id,
             "timestamp": f"{date_str} {time_str}",
             "date": date_str,
             "time": time_str,
@@ -491,7 +500,7 @@ def main():
         # Update or append
         existing_idx = None
         for idx, r in enumerate(records):
-            if r["date"] == date_str and r["slot"] == slot and r["keyword_id"] == k["id"]:
+            if r["date"] == date_str and slot_key(r["slot"]) == slot_key(slot) and r["keyword_id"] == k["id"]:
                 existing_idx = idx
                 break
 
@@ -499,6 +508,7 @@ def main():
             records[existing_idx] = rec
         else:
             records.append(rec)
+            next_id += 1
             new_records_count += 1
 
         print(f"  - [{k['hospital']}] {k['display_name']} -> exposed={res['is_exposed']}, rank={res['rank']}")

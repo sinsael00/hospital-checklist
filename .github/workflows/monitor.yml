@@ -1,0 +1,45 @@
+name: YouTube Autocomplete Monitor
+
+on:
+  schedule:
+    # GitHub cron은 UTC 기준: 00:00 UTC = 09:00 KST, 09:00 UTC = 18:00 KST
+    - cron: "0 0 * * *"
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run monitor (check + render)
+        run: python scripts/run_monitor.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "Cloud Auto Update: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S') KST"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
