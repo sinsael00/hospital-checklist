@@ -5,100 +5,299 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오호성형외과 유튜브 시크릿 자동완성 실시간 모니터링 관제센터</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; background: #F8FAFC; color: #0F172A; padding: 24px; }
-        .header { background: #FFFFFF; border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
-        .header h1 { font-size: 24px; font-weight: 800; color: #0F172A; }
-        .header-meta { font-size: 13px; color: #64748B; }
-        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-        .kpi-card { background: #F1F5F9; border-radius: 12px; padding: 18px 20px; border: 1px solid #E2E8F0; }
-        .kpi-title { font-size: 13px; color: #64748B; font-weight: 600; margin-bottom: 6px; }
-        .kpi-value { font-size: 26px; font-weight: 800; color: #0F172A; }
-        .kpi-sub { font-size: 12px; color: #94A3B8; margin-top: 4px; }
-        .month-tab-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; background: #FFFFFF; padding: 12px 20px; border-radius: 12px; border: 1px solid #E2E8F0; }
+        :root {
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --primary: #1E3A8A;
+            --accent-yellow: #FEF08A;
+            --accent-green: #10B981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px 20px; line-height: 1.5; }
+        .container { max-width: 1300px; margin: 0 auto; }
+
+        .header {
+            background: linear-gradient(135deg, #0F172A, #1E293B);
+            color: white;
+            padding: 26px 32px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .header-title-box { display: flex; flex-direction: column; gap: 8px; }
+        .header-badge-row { display: flex; align-items: center; gap: 10px; }
+        .badge-hospital { background: linear-gradient(135deg, #2563EB, #1D4ED8); color: white; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(37,99,235,0.3); }
+        .badge-live { background-color: #059669; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; }
+        .badge-live::before { content: ""; width: 7px; height: 7px; background-color: #6EE7B7; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.4); } 100% { opacity: 1; transform: scale(1); } }
+        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .header p { font-size: 13px; color: #94A3B8; }
+
+
+        .month-tab-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; background: #FFFFFF; padding: 14px 20px; border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .month-tab-label { font-size: 13px; font-weight: 800; color: #334155; }
-        .month-tab { display: inline-flex; align-items: center; padding: 9px 18px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; color: #475569; background: #F1F5F9; transition: all 0.2s ease; border: 1px solid #CBD5E1; }
+        .month-tab { display: inline-flex; align-items: center; padding: 9px 18px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; color: #475569; background: #F8FAFC; transition: all 0.15s ease; border: 1px solid #CBD5E1; }
         .month-tab:hover { background: #E2E8F0; color: #0F172A; }
-        .month-tab.active { background: linear-gradient(135deg, #2563EB, #1D4ED8); color: #FFFFFF; border-color: #1D4ED8; box-shadow: 0 4px 10px rgba(37,99,235,0.25); }
-        .goal-banner { background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px solid #10B981; border-radius: 14px; padding: 16px 22px; margin-bottom: 22px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 12px rgba(16,185,129,0.15); }
-        .goal-banner-icon { font-size: 28px; }
-        .goal-banner-title { font-size: 16px; font-weight: 800; color: #065F46; }
-        .goal-banner-desc { font-size: 13px; color: #047857; margin-top: 4px; }
-        .today-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .today-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .today-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 10px; }
-        .today-kw-query { font-size: 11px; color: #64748B; font-weight: 600; text-transform: uppercase; }
+        .month-tab.active { background: linear-gradient(135deg, #2563EB, #1D4ED8); color: #FFFFFF; border-color: #1D4ED8; box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
+
+        .btn-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-sheet { background: linear-gradient(135deg, #0284C7, #0369A1); color: white; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3); }
+        .btn-sheet:hover { transform: translateY(-2px); box-shadow: 0 6px 12px -2px rgba(2, 132, 199, 0.4); }
+        .btn-excel { background: linear-gradient(135deg, #059669, #047857); color: white; box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3); }
+        .btn-excel:hover { transform: translateY(-2px); box-shadow: 0 6px 12px -2px rgba(5, 150, 105, 0.4); }
+        .btn-refresh { background-color: #334155; color: #F1F5F9; }
+        .btn-refresh:hover { background-color: #475569; }
+
+        .goal-banner {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border: 2px solid #F59E0B;
+            border-radius: 14px;
+            padding: 16px 22px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.15);
+        }
+        .goal-banner-icon { font-size: 32px; }
+        .goal-banner strong { color: #92400E; font-size: 15px; display: block; margin-bottom: 2px; }
+        .goal-banner p { color: #78350F; font-size: 13px; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 20px 22px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .kpi-title { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+        .kpi-value { font-size: 26px; font-weight: 800; color: var(--text-main); margin-top: 2px; }
+        .kpi-sub { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+            overflow: hidden;
+            margin-bottom: 26px;
+        }
+        .section-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FFFFFF;
+        }
+        .section-title { font-size: 16px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px; }
+        .section-badge { font-size: 12px; color: #475569; background-color: #F1F5F9; padding: 4px 10px; border-radius: 6px; font-weight: 600; }
+
+        .today-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+            padding: 22px;
+            background-color: #F8FAFC;
+        }
+        .today-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .today-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .today-kw-query { font-size: 11px; color: #64748B; font-weight: 600; }
         .today-kw-title { font-size: 16px; font-weight: 800; color: #0F172A; margin-top: 2px; }
-        .badge-contract-day { background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; border: 1px solid #FCD34D; white-space: nowrap; }
-        .badge-contract-day.goal { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; }
-        .today-card-slots { display: flex; flex-direction: column; gap: 8px; }
-        .slot-item { display: flex; justify-content: space-between; align-items: center; background: #F8FAFC; padding: 10px 14px; border-radius: 8px; border: 1px solid #F1F5F9; font-size: 13px; }
-        .slot-badge.ok { background: #D1FAE5; color: #065F46; font-weight: 800; padding: 3px 10px; border-radius: 6px; }
-        .slot-badge.fail { background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
-        .slot-badge.wait { background: #F1F5F9; color: #94A3B8; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
-        .table-wrap { background: #FFFFFF; border-radius: 16px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 24px; }
-        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; min-width: 800px; }
-        th, td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; }
-        th { background: #F8FAFC; color: #475569; font-weight: 700; }
-        .kw-th { background: #0F172A; color: #FFFFFF; font-size: 14px; padding: 12px; }
-        .sub-th { background: #F1F5F9; font-size: 12px; }
-        tr.today-row { background: #EFF6FF; font-weight: 700; }
-        tr.weekend-row { background: #F8FAFC; }
-        .badge-ok { color: #059669; font-weight: 800; }
-        .badge-fail { color: #CBD5E1; font-weight: 700; }
-        .badge-judge-ok { background: #D1FAE5; color: #065F46; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 12px; }
-        .badge-judge-half { background: #FEF3C7; color: #92400E; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 12px; }
-        .badge-judge-fail { color: #94A3B8; font-size: 12px; }
-        .cell-yellow-badge strong { background: #FEF08A; color: #854D0E; padding: 3px 8px; border-radius: 6px; }
-        .cell-goal-reached strong { background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 4px 10px; border-radius: 6px; font-weight: 800; box-shadow: 0 2px 6px rgba(16,185,129,0.3); }
-        .cell-summary-goal { background: #ECFDF5; color: #065F46; font-size: 14px; font-weight: 800; text-align: center; }
-        .cell-summary { background: #F8FAFC; color: #334155; font-size: 13px; text-align: center; }
-        .footer { text-align: center; font-size: 12px; color: #94A3B8; margin-top: 32px; padding-bottom: 24px; }
+        .badge-contract-day {
+            background-color: #FEF08A;
+            color: #854D0E;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #FACC15;
+        }
+        .badge-contract-day.goal {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            border: 1px solid #047857;
+        }
+        .today-card-slots { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed #E2E8F0; padding-top: 12px; }
+        .slot-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .slot-label { color: #475569; font-weight: 600; }
+        .slot-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+        .slot-badge.ok { background-color: #D1FAE5; color: #065F46; }
+        .slot-badge.fail { background-color: #FEE2E2; color: #991B1B; }
+        .slot-badge.wait { background-color: #F1F5F9; color: #64748B; }
+
+        .table-wrap { overflow-x: auto; }
+        table.monitor-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: center;
+        }
+        table.monitor-table th {
+            background-color: #0F172A;
+            color: #FFFFFF;
+            padding: 11px 8px;
+            font-weight: 700;
+            border: 1px solid #334155;
+            letter-spacing: -0.2px;
+        }
+        table.monitor-table th.kw-th {
+            background-color: #1E293B;
+            font-size: 13px;
+            padding: 12px 10px;
+        }
+        table.monitor-table th.sub-th {
+            background-color: #334155;
+            font-size: 11px;
+            font-weight: 600;
+            color: #CBD5E1;
+        }
+        table.monitor-table td {
+            padding: 9px 6px;
+            border: 1px solid var(--border-color);
+            color: #1E293B;
+        }
+        table.monitor-table tr:hover td { background-color: #F1F5F9; }
+
+        .badge-ok { background-color: #D1FAE5; color: #065F46; font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; display: inline-block; }
+        .badge-fail { color: #94A3B8; font-size: 12px; }
+        .badge-judge-ok { background-color: #FEF3C7; color: #92400E; font-size: 11px; font-weight: 800; padding: 3px 6px; border-radius: 4px; }
+        .badge-judge-half { background-color: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 800; padding: 3px 6px; border-radius: 4px; }
+        .badge-judge-fail { color: #CBD5E1; font-size: 11px; }
+
+        td.cell-yellow-badge {
+            background-color: #FEF08A !important;
+            color: #854D0E !important;
+            font-size: 13px;
+        }
+        td.cell-goal-reached {
+            background: linear-gradient(135deg, #FDE68A, #F59E0B) !important;
+            color: #78350F !important;
+            font-size: 13px;
+            font-weight: 800;
+        }
+        td.cell-unexposed { color: #94A3B8; font-size: 12px; }
+        td.cell-future { color: #E2E8F0; font-size: 12px; }
+        
+        td.cell-summary {
+            background-color: #F8FAFC;
+            color: #1E3A8A;
+            font-size: 13px;
+            padding: 12px 8px;
+        }
+        td.cell-summary-goal {
+            background-color: #D1FAE5;
+            color: #065F46;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 12px 8px;
+        }
+
+        tr.today-row td {
+            background-color: #FEF9C3 !important;
+            font-weight: 600;
+        }
+        tr.weekend-row { background-color: #FAFAFA; }
+
+        .footer { text-align: center; font-size: 12px; color: #94A3B8; margin-top: 30px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-top">
-            <div>
+    <div class="container">
+        <header class="header">
+            <div class="header-title-box">
+                <div class="header-badge-row">
+                    <span class="badge-hospital">오호성형외과 전용</span>
+                    <span class="badge-live">30일 보장 실시간 관제</span>
+                </div>
                 <h1>🎥 오호성형외과 유튜브 자동완성 실시간 모니터링 관제센터</h1>
-                <div class="header-meta">24시간 클라우드 무인 자동 점검 · 매일 09:00 / 18:00 정기 점검 갱신</div>
+                <p>정기 점검: 매일 오전 09:00 / 오후 18:00 (오전/오후 분리 점검, 1회 미노출 시 0.5일 인정)  |  최종 갱신: 2026-11-13 09:00:17</p>
             </div>
-            <div>
-                <a href="../" style="text-decoration: none; padding: 8px 16px; background: #0F172A; color: white; border-radius: 8px; font-size: 13px; font-weight: 700;">← 전체 병원 포털</a>
-            </div>
-        </div>
-        <div class="kpi-row">
-            <div class="kpi-card">
-                <div class="kpi-title">모니터링 대상 키워드</div>
-                <div class="kpi-value">2개</div>
-                <div class="kpi-sub">완전 분리 단독 관제</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">보장 계약 기준</div>
-                <div class="kpi-value">30일 단위</div>
-                <div class="kpi-sub">오전/오후 0.5일 합산 보장제</div>
-            </div>
-        </div>
-    </div>
+            <div class="btn-group">
 
+                <a href="/download/excel/oho?year=2026&month=10" class="btn btn-excel">
+                    📥 엑셀 다운로드 (.xlsx)
+                </a>
+                <button onclick="location.reload()" class="btn btn-refresh">
+                    🔄 새로고침
+                </button>
+            </div>
+        </header>
+
+        
     <div class="month-tab-bar">
         <span class="month-tab-label">📅 점검 월 선택:</span>
         <a href="nov.html" class="month-tab ">2026년 11월 (진행중)</a>
         <a href="oct.html" class="month-tab active">2026년 10월 내역 (보장 달성)</a>
         <a href="sep.html" class="month-tab ">2026년 9월 내역 (완료)</a>
-    </div>
-    
+    </div></div>
+            <div class="kpi-card" style="border-left: 4px solid #10B981;">
+                <div class="kpi-title">🌅 오늘 오전 점검 (09:00)</div>
+                <div class="kpi-value" style="color: #059669;">0 / 2</div>
+                <div class="kpi-sub">정상 노출 키워드</div>
+            </div>
+            <div class="kpi-card" style="border-left: 4px solid #6366F1;">
+                <div class="kpi-title">🌇 오늘 오후 점검 (18:00)</div>
+                <div class="kpi-value" style="color: #64748B; font-size: 18px;">대기 (18:00 예정)</div>
+                <div class="kpi-sub">정상 노출 키워드</div>
+            </div>
+            <div class="kpi-card" style="border-left: 4px solid #F59E0B;">
+                <div class="kpi-title">🏆 30일 보장 계약 관리</div>
+                <div class="kpi-value">30일 단위</div>
+                <div class="kpi-sub">30일 도달 시 보장 완료 알림</div>
+            </div>
+        </div>
 
-    <div class="today-card-grid">
-        
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title">
+                    ⚡ 오늘 정기 점검 현황 (11월 13일)
+                </div>
+                <span class="section-badge">오전 09:00 & 오후 18:00 이중 점검 (0.5일 가중치 적용)</span>
+            </div>
+            <div class="today-grid">
+                
         <div class="today-card">
             <div class="today-card-top">
                 <div>
                     <span class="today-kw-query">검색어: 상안검</span>
                     <h3 class="today-kw-title">상안검 오호성형외과</h3>
                 </div>
-                <span class="badge-contract-day">보장 22.5일차 (잔여 8일)</span>
+                <span class="badge-contract-day">보장 21.5일차 (잔여 9일)</span>
             </div>
             <div class="today-card-slots">
                 <div class="slot-item">
@@ -118,7 +317,7 @@
                     <span class="today-kw-query">검색어: 하안검</span>
                     <h3 class="today-kw-title">하안검 오호성형외과</h3>
                 </div>
-                <span class="badge-contract-day">보장 22.0일차 (잔여 8일)</span>
+                <span class="badge-contract-day">보장 17일차 (잔여 13일)</span>
             </div>
             <div class="today-card-slots">
                 <div class="slot-item">
@@ -132,26 +331,34 @@
             </div>
         </div>
         
-    </div>
+            </div>
+        </div>
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th rowspan="2" style="width: 70px;">날짜</th>
-                    <th rowspan="2" style="width: 50px;">요일</th>
-                    <th colspan="4" class="kw-th">🔍 상안검 오호성형외과 (상안검)</th>
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title">
+                    📋 월간 정기 점검 체크리스트 (2026년 10월)
+                </div>
+                <span class="section-badge">30일 보장형 누적 관리 (1회 미노출 시 0.5일)</span>
+            </div>
+            <div class="table-wrap">
+                <table class="monitor-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 80px;">날짜</th>
+                            <th rowspan="2" style="width: 50px;">요일</th>
+                            <th colspan="4" class="kw-th">🔍 상안검 오호성형외과 (상안검)</th>
 <th colspan="4" class="kw-th">🔍 하안검 오호성형외과 (하안검)</th>
 
-                </tr>
-                <tr>
-                    <th class="sub-th">오전 09:00</th><th class="sub-th">오후 18:00</th><th class="sub-th">당일 인정</th><th class="sub-th">보장 일차</th>
+                        </tr>
+                        <tr>
+                            <th class="sub-th">오전 09:00</th><th class="sub-th">오후 18:00</th><th class="sub-th">당일 인정</th><th class="sub-th">보장 일차</th>
 <th class="sub-th">오전 09:00</th><th class="sub-th">오후 18:00</th><th class="sub-th">당일 인정</th><th class="sub-th">보장 일차</th>
 
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td><strong>10/01</strong></td><td><strong>목</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>10/01</strong></td><td><strong>목</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
 <tr><td><strong>10/02</strong></td><td><strong>금</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
 <tr class="weekend-row"><td><strong>10/03</strong></td><td style="color: #2563EB;"><strong>토</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
 <tr class="weekend-row"><td><strong>10/04</strong></td><td style="color: #DC2626;"><strong>일</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
@@ -183,15 +390,23 @@
 <tr><td><strong>10/30</strong></td><td><strong>금</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
 <tr class="weekend-row"><td><strong>10/31</strong></td><td style="color: #2563EB;"><strong>토</strong></td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td><td><span class="badge-fail">x</span></td><td><span class="badge-fail">x</span></td><td><span class="badge-judge-fail">미노출</span></td><td class="cell-unexposed">x</td></tr>
 
-                <tr>
-                    <td><strong>30일 보장 현황</strong></td><td>-</td><td colspan="4" class="cell-summary">현재 <strong>22.5일</strong> / 30일 보장 (잔여 <strong>8일</strong>)</td><td colspan="4" class="cell-summary">현재 <strong>22.0일</strong> / 30일 보장 (잔여 <strong>8일</strong>)</td>
-                </tr>
-            </tbody>
-        </table>
+                        <tr style="background-color: #F8FAFC; border-top: 2px solid #CBD5E1;">
+                            <td><strong>30일 보장 현황</strong></td><td>-</td><td colspan="4" class="cell-summary">현재 <strong>21.5일</strong> / 30일 보장 (잔여 <strong>9일</strong>)</td><td colspan="4" class="cell-summary">현재 <strong>17일</strong> / 30일 보장 (잔여 <strong>13일</strong>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            오호성형외과 전용 실시간 자동완성 관제 시스템 • 30일 노출 보장 계약 관리 • 60초마다 화면이 자동으로 새로고침됩니다.
+        </div>
     </div>
 
-    <div class="footer">
-        ⚡ GitHub Actions Cloud Automation Engine · 365일 24시간 무중단 가동
-    </div>
+    <script>
+        setTimeout(function() {
+            location.reload();
+        }, 60000);
+    </script>
 </body>
 </html>
